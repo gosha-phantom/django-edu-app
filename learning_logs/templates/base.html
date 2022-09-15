@@ -14,6 +14,11 @@
         <h5>
             <a href="{% url 'index' %}">Learning Log</a>
             <a href="{% url 'topics' %}">Topics</a>
+            {% if user.is_authenticated %}
+                Hello, {{  user.username}}
+            {% else %}
+                <a href="{% url 'users:login' %}">Authorization</a>
+            {% endif %}
         </h5>
         
         {% block content %}
