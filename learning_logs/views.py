@@ -1,11 +1,15 @@
 from django.shortcuts import render
-from .models import Topic
-# from django.http import HttpRequest
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+from .models import Entry, Topic
+from .forms import TopicForm, EntryForm
 
 # Create your views here.
 def index(request):
     # вывод общей информации
     return render(request, 'index.html')
+
 
 def topics(request):
     """Вывод списка тем для обучений"""
@@ -13,9 +17,65 @@ def topics(request):
     context = {'topics': topics}
     return render(request, 'topics.html', context)
 
+
 def topic(request, topic_id):
     """Выводит одну тему и все её записи"""
     topic = Topic.objects.get(id=topic_id)
     entries = topic.entry.order_by('-date_added')
     context = {'topic': topic, 'entries': entries}
     return render(request, 'topic.html', context)
+
+
+def new_topic(request):
+    """Опрделяет новую тему для обучения"""
+    if request.method != 'POST':
+        # данные не отправлялись, создается пустая форма
+        form = TopicForm()
+    else:
+        # отправлены данные из формы, необходимо обработать
+        form = TopicForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('topics'))
+    
+    context = {'form': form}
+    return render(request, 'new_topic.html', context)
+
+
+def new_entry(request, topic_id):
+    """Добавляет новую запись по конкретной теме"""
+    topic = Topic.objects.get(id=topic_id)
+
+    if request.method != 'POST':
+        # данные не отправлялись, создается пустая форма
+        form = EntryForm()
+    else:
+        # отправлены данные из формы, необходимо обработать
+        form = EntryForm(data=request.POST)
+        if form.is_valid():
+            new_entry = form.save(commit=False)
+            new_entry.topic = topic
+            new_entry.save()
+            return HttpResponseRedirect(reverse('topic', args=[topic_id]))
+    
+    context = {'topic': topic, 'form': form}
+    return render(request, 'new_entry.html', context)
+
+
+def edit_entry(request, entry_id):
+    """Изменяет запись по конкретной теме"""
+    entry = Entry.objects.get(id=entry_id)
+    topic = entry.topic
+    
+    if request.method != 'POST':
+        # данные не отправлялись, создается пустая форма
+        form = EntryForm(instance=entry)
+    else:
+        # отправлены данные из формы, необходимо обработать
+        form = EntryForm(instance=entry, data=request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('topic', args=[topic.id]))
+    
+    context = {'entry': entry, 'topic': topic, 'form': form}
+    return render(request, 'edit_entry.html', context)
