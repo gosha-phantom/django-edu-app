@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 # мои настройки
 LOGIN_URL = '/users/login/'
 
+# настройки django-bootstrap5
+
 
 # Application definition
 
@@ -40,9 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap5',
     # мои приложения
     'learning_logs',
-    'users'
+    'users'    
 ]
 
 MIDDLEWARE = [
