@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# мои настройки
+LOGIN_URL = '/users/login/'
+
 
 # Application definition
 
